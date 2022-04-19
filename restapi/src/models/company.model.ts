@@ -1,7 +1,7 @@
 import {Entity, model, property} from '@loopback/repository';
 
 @model({settings: {strict: false}})
-export class Student extends Entity {
+export class Company extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -13,13 +13,25 @@ export class Student extends Entity {
     type: 'string',
     required: true,
   })
-  name: string;
+  companyName?: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  job: string;
+  place: string;
+
+  @property({
+    type: 'number',
+    required: true,
+  })
+  numberofStaffs: number;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  Department: string;
 
   @property({
     type: 'string',
@@ -27,29 +39,7 @@ export class Student extends Entity {
   })
   teamLead: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  email: string;
 
-  @property({
-    type: 'string',
-    required: true,
-  })
-  course: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  password: string;
-
-  @property({
-    type: 'boolean',
-    required: true,
-  })
-  isQualified: boolean;
 
   // Define well-known properties here
 
@@ -57,13 +47,13 @@ export class Student extends Entity {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 
-  constructor(data?: Partial<Student>) {
+  constructor(data?: Partial<Company>) {
     super(data);
   }
 }
 
-export interface StudentRelations {
+export interface CompanyRelations {
   // describe navigational properties here
 }
 
-export type StudentWithRelations = Student & StudentRelations;
+export type CompanyWithRelations = Company & CompanyRelations;

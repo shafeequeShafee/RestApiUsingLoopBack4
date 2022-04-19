@@ -17,13 +17,23 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+
 import {Student} from '../models';
 import {StudentRepository} from '../repositories';
+
+// import {Company} from '../models';
+// import {CompanyRepository} from '../repositories';
+
+// import {DbDataSource} from '../datasources';
+
 
 export class StudentController {
   constructor(
     @repository(StudentRepository)
     public studentRepository : StudentRepository,
+
+    // @repository(CompanyRepository)
+    // public CompanyRepository : CompanyRepository,
   ) {}
 
   @post('/students')
@@ -147,4 +157,85 @@ export class StudentController {
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.studentRepository.deleteById(id);
   }
+
+
+
+  @get('/getAllDetails')
+  @response(200, {
+    description: 'Student model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Student, {includeRelations: true}),
+      },
+    },
+  })
+  async findAllDetails(
+
+  ): Promise<any> {
+    try{
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+        let studentDetails = await studentsCollection.aggregate([
+          { $lookup:
+              {
+                  from: "Company",
+                  localField: "teamLead",
+                  foreignField: "teamLead",
+                  as: "Employ details"
+              }
+           }
+          ]).get()
+
+      return studentDetails
+    }
+    catch(e){
+      return e.message
+
+    }
+  }
+
+
+
+
+  @get('/getAllDetails/{id}')
+  @response(200, {
+    description: 'Student model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Student, {includeRelations: true}),
+      },
+    },
+  })
+  async findAllDetailsById(
+    @param.path.string('id') id: string
+  ): Promise<any> {
+    try{
+
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+        let studentDetails = await studentsCollection.aggregate([
+          { $lookup:
+              {
+                  from: "Company",
+                  localField: "teamLead",
+                  foreignField: "teamLead",
+                  as: "Employ details"
+              }
+           },
+           ,{
+            $match: {
+              "_id":id
+            }
+          }
+          ]).get()
+
+      return studentDetails
+    }
+    catch(e){
+      return e.message
+
+    }
+  }
+
+
 }
