@@ -26,6 +26,8 @@ import {StudentRepository} from '../repositories';
 
 // import {DbDataSource} from '../datasources';
 
+const ObjectID = require('mongodb').ObjectID;
+
 
 export class StudentController {
   constructor(
@@ -206,6 +208,8 @@ export class StudentController {
       },
     },
   })
+
+
   async findAllDetailsById(
     @param.path.string('id') id: string
   ): Promise<any> {
@@ -219,14 +223,14 @@ export class StudentController {
                   from: "Company",
                   localField: "teamLead",
                   foreignField: "teamLead",
-                  as: "Employ details"
+                  as:"Studentdetails"
               }
            },
-           ,{
-            $match: {
-              "_id":id
-            }
-          }
+            {
+              $match: {
+                "_id":ObjectID(id)
+              }
+           }
           ]).get()
 
       return studentDetails
