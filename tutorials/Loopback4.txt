@@ -1,0 +1,60 @@
+#)loopback cli
+  npm i -g @loopback/cli
+
+#) creating project
+  lb4 basicapp(name of project)
+  cd basicapp
+  npm start
+
+
+#)Generics
+
+ function identity<T>(arg:T):T {
+    return arg;
+ }
+
+ let output1 = identity('Hello word');
+ let output2 = identity(1);
+
+#) installing typescript
+
+  npm install -g typescript
+
+running typescript
+
+
+tsc app.js
+
+Project steps
+##################
+#) creating project
+  lb4 basicapp(name of project)
+
+#) Authentication  ###########
+
+npm i --save @loopback/authentication @loopback/authentication-jwt
+
+#)MongoDb annekil
+  npm i loopback-connector-mongodb --save
+
+#)Creating Datasource // this for connecting mongoDb, sql etc..to database
+ lb4 datasource
+
+#)creating Model
+ lb4 model 
+
+#)creating Repository
+ lb4 repository
+
+#)Adding your own controller
+  lb4 controller 
+
+
+////////////////////
+
+#)Adding your service
+  lb4 service
+
+
+
+
