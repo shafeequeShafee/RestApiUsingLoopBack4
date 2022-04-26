@@ -1,4 +1,4 @@
-
+//for service
 import {inject} from '@loopback/core';
 import {
   Count,
@@ -8,10 +8,10 @@ import {
   repository,
   Where
 } from '@loopback/repository';
+//Accessing HTTP request and response objects
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
-  response
+  getModelSchemaRef, param, patch, post, put, Request, requestBody, RequestContext, Response, response, RestBindings
 } from '@loopback/rest';
 import {Company, Student} from '../models';
 import {studentViewModel} from '../models/Request/studentViewmodel';
@@ -24,8 +24,8 @@ import {FirstserviceService} from '../services/firstservice.service';
 
 
 
-// import {DbDataSource} from '../datasources';
 
+// import {DbDataSource} from '../datasources';
 const ObjectID = require('mongodb').ObjectID;
 
 
@@ -39,6 +39,12 @@ export class StudentController {
     /// service add cheyunnu
     @inject('services.FirstserviceService')
     public Firstservice: FirstserviceService,
+    // Request
+    @inject(RestBindings.Http.REQUEST) private request: Request,
+    // Response
+    @inject(RestBindings.Http.RESPONSE) private response: Response,
+    //RequestContext
+    @inject(RestBindings.Http.CONTEXT) private requestCtx: RequestContext
   ) { }
 
   @post('/students')
@@ -383,6 +389,213 @@ export class StudentController {
     this.studentRepository.create(student);
     this.companyRepository.create(company);
   }
+
+
+
+  // @get('/student/getStud')
+  // @response(200, {
+  //   description: 'Array of Student model instances',
+  //   content: {
+  //     'application/json': {
+  //       schema: {
+  //         type: 'array',
+  //         items: getModelSchemaRef(Student, {includeRelations: true}),
+  //       },
+  //     },
+  //   },
+  // })findDetails(): object {
+  //     // Reply with a greeting, the current time, the url, and request headers
+  //     return {
+  //       greeting: 'Hello from LoopBack',
+  //       date: new Date(),
+  //       url: this.request.url,
+  //       headers: Object.assign({}, this.request.headers),
+  //     };
+  //   }
+
+
+
+
+  ////////////   Request , Response, Inject HTTP request context      ethil ellaaam und/////////////////////////////
+
+
+
+  ////  Request
+
+  @get('/student/getStud')
+  @response(200, {
+    description: 'Array of Student model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Student, {includeRelations: true}),
+        },
+      },
+    },
+  }) async findDetails(): Promise<any> {
+    try {
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+      let studentDetails = await studentsCollection.aggregate([
+        {
+          $lookup:
+          {
+            from: "Company",
+            localField: "teamLead",
+            foreignField: "teamLead",
+            as: "Employ details"
+          }
+        }
+      ]).get()
+
+      return {
+        studentdetails: studentDetails,
+        url: this.request.url,
+        headers: Object.assign({}, this.request.headers),
+
+      }
+    }
+    catch (e) {
+      return e.message
+
+    }
+  }
+
+
+  @post('/students/input')
+  @response(200, {
+    description: 'Student model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Student)}},
+  })
+  async inputData(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Student, {
+            title: 'NewStudent',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    student: Omit<Student, 'id'>,
+  ): Promise<any> {
+    try {
+      const body = this.request.body      // eth nalloru example aaannu
+      console.log("body", body)
+
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+      let studentDetails = await studentsCollection.insert(student).post()
+      // console.log("studentDetails",studentDetails)
+      return studentDetails
+
+    }
+    catch (e) {
+      return e.message
+
+    }
+
+  }
+
+
+  ///////  Response
+
+  @get('/getResponseDetails/{id}')
+  @response(200, {
+    description: 'Student model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Student, {includeRelations: true}),
+      },
+    },
+  })
+  async findDetailsById(
+    @param.path.string('id') id: string
+  ): Promise<any> {
+    try {
+
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+      let studentDetails = await studentsCollection.aggregate([
+        {
+          $lookup:
+          {
+            from: "Company",
+            localField: "teamLead",
+            foreignField: "teamLead",
+            as: "Studentdetails"
+          }
+        },
+        {
+          $match: {
+            "_id": ObjectID(id)
+          }
+        }
+      ]).get()
+      this.response.status(200).send({
+        studentDetails: studentDetails,
+        date: new Date(),
+      });
+      // return studentDetails
+    }
+    catch (e) {
+      return e.message
+
+    }
+  }
+
+
+  /////  RequestContext
+
+  @get('/getDet/{id}')
+  @response(200, {
+    description: 'Student model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Student, {includeRelations: true}),
+      },
+    },
+  })
+  async findDetById(
+    @param.path.string('id') id: string
+  ): Promise<any> {
+    try {
+      const {request, response} = this.requestCtx;
+      const studentsCollection = (this.studentRepository.dataSource
+        .connector as any).collection("Student");
+      let studentDetails = await studentsCollection.aggregate([
+        {
+          $lookup:
+          {
+            from: "Company",
+            localField: "teamLead",
+            foreignField: "teamLead",
+            as: "Studentdetails"
+          }
+        },
+        {
+          $match: {
+            "_id": ObjectID(id)
+          }
+        }
+      ]).get()
+      response.status(200).send({
+        studentDetails: studentDetails,
+        date: new Date(),
+      });
+      // return studentDetails
+    }
+    catch (e) {
+      return e.message
+
+    }
+  }
+
+
+
+
 
 
 }
