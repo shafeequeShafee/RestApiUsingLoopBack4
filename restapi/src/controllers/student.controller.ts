@@ -1,33 +1,28 @@
 
-
-
+import {inject} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
+import {Company, Student} from '../models';
+import {studentViewModel} from '../models/Request/studentViewmodel';
+import {CompanyRepository, StudentRepository} from '../repositories';
+import {ApiserviceService} from '../services/apiservice.service';
+// service aadd cheyunnath
+import {FirstserviceService} from '../services/firstservice.service';
 
-import {Student} from '../models';
-import {StudentRepository} from '../repositories';
 
-import {Company} from '../models';
-import {CompanyRepository} from '../repositories';
 
-import{studentViewModel} from '../models/Request/studentViewmodel'
+
 
 // import {DbDataSource} from '../datasources';
 
@@ -40,7 +35,10 @@ export class StudentController {
     public studentRepository: StudentRepository,
 
     @repository(CompanyRepository)
-    public companyRepository : CompanyRepository,
+    public companyRepository: CompanyRepository,
+    /// service add cheyunnu
+    @inject('services.FirstserviceService')
+    public Firstservice: FirstserviceService,
   ) { }
 
   @post('/students')
@@ -72,10 +70,13 @@ export class StudentController {
   async count(
     @param.where(Student) where?: Where<Student>,
   ): Promise<Count> {
+    const apiserviceService = new ApiserviceService()
+    apiserviceService.SaiHello()
+
     return this.studentRepository.count(where);
   }
-
-  @get('/students')
+  //////////   ethil service use cheythkknnu
+  @get('/studentsssss')
   @response(200, {
     description: 'Array of Student model instances',
     content: {
@@ -90,7 +91,7 @@ export class StudentController {
   async find(
     @param.filter(Student) filter?: Filter<Student>,
   ): Promise<Student[]> {
-    return this.studentRepository.find(filter);
+    return this.Firstservice.AllAdmin(filter);
   }
 
   @patch('/students')
@@ -288,7 +289,7 @@ export class StudentController {
     @requestBody({
       content: {
         'application/json': {
-          schema:getModelSchemaRef(studentViewModel, {
+          schema: getModelSchemaRef(studentViewModel, {
             title: 'fullDetail Model',
             exclude: ['id'],
           }),
@@ -298,21 +299,21 @@ export class StudentController {
     allDetails: Omit<studentViewModel, 'id'>,
   ): Promise<any> {
     try {
-      const companyDetailz =new Company()
-      companyDetailz.companyName=allDetails.companyName;
-      companyDetailz.Department=allDetails.Department;
-      companyDetailz.numberofStaffs=allDetails.numberofStaffs;
-      companyDetailz.place=allDetails.place;
-      companyDetailz.teamLead=allDetails.teamLead;
+      const companyDetailz = new Company()
+      companyDetailz.companyName = allDetails.companyName;
+      companyDetailz.Department = allDetails.Department;
+      companyDetailz.numberofStaffs = allDetails.numberofStaffs;
+      companyDetailz.place = allDetails.place;
+      companyDetailz.teamLead = allDetails.teamLead;
 
-      const studentDetailz= new Student()
-      studentDetailz.course=allDetails.course;
-      studentDetailz.email=allDetails.email;
-      studentDetailz.name=allDetails.name;
-      studentDetailz.job=allDetails.job;
-      studentDetailz.teamLead=allDetails.teamLead;
-      studentDetailz.isQualified=allDetails.isQualified;
-      studentDetailz.password=allDetails.password;
+      const studentDetailz = new Student()
+      studentDetailz.course = allDetails.course;
+      studentDetailz.email = allDetails.email;
+      studentDetailz.name = allDetails.name;
+      studentDetailz.job = allDetails.job;
+      studentDetailz.teamLead = allDetails.teamLead;
+      studentDetailz.isQualified = allDetails.isQualified;
+      studentDetailz.password = allDetails.password;
 
       this.studentRepository.create(studentDetailz)
       this.companyRepository.create(companyDetailz)
@@ -343,31 +344,44 @@ export class StudentController {
   })
   async creatingFullDetails(
     @requestBody()
-    allDetails:any
+    allDetails: any
   ): Promise<any> {
-    try{
-      const companyDetailz =new Company()
-      companyDetailz.companyName=allDetails.companyName;
-      companyDetailz.Department=allDetails.Department;
-      companyDetailz.numberofStaffs=allDetails.numberofStaffs;
-      companyDetailz.place=allDetails.place;
-      companyDetailz.teamLead=allDetails.teamLead;
+    try {
+      const companyDetailz = new Company()
+      companyDetailz.companyName = allDetails.companyName;
+      companyDetailz.Department = allDetails.Department;
+      companyDetailz.numberofStaffs = allDetails.numberofStaffs;
+      companyDetailz.place = allDetails.place;
+      companyDetailz.teamLead = allDetails.teamLead;
 
-      const studentDetailz= new Student()
-      studentDetailz.course=allDetails.course;
-      studentDetailz.email=allDetails.email;
-      studentDetailz.name=allDetails.name;
-      studentDetailz.job=allDetails.job;
-      studentDetailz.teamLead=allDetails.teamLead;
-      studentDetailz.isQualified=allDetails.isQualified;
-      studentDetailz.password=allDetails.password;
+      const studentDetailz = new Student()
+      studentDetailz.course = allDetails.course;
+      studentDetailz.email = allDetails.email;
+      studentDetailz.name = allDetails.name;
+      studentDetailz.job = allDetails.job;
+      studentDetailz.teamLead = allDetails.teamLead;
+      studentDetailz.isQualified = allDetails.isQualified;
+      studentDetailz.password = allDetails.password;
 
       this.studentRepository.create(studentDetailz)
       this.companyRepository.create(companyDetailz)
     }
-    catch(e){
+    catch (e) {
 
     }
+  }
+
+
+  @post('/students/FullDetailsnew')
+  @response(200, {
+    description: 'Student model instance',
+  })
+  async creatingFullDetailsnew(
+    @param.query.object('student') student: Student,
+    @param.query.object('company') company: Company,
+  ): Promise<any> {
+    this.studentRepository.create(student);
+    this.companyRepository.create(company);
   }
 
 
